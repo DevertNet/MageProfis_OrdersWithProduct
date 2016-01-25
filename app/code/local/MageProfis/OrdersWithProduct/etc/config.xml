@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <MageProfis_OrdersWithProduct>
+            <version>0.1.0</version>
+        </MageProfis_OrdersWithProduct>
+    </modules>
+    <global>
+        <blocks>
+            <mageprofis_orderswithproduct>
+                <class>MageProfis_OrdersWithProduct_Block</class>
+            </mageprofis_orderswithproduct>
+        </blocks>
+        <helpers>
+            <mageprofis_orderswithproduct>
+                <class>MageProfis_OrdersWithProduct_Helper</class>
+            </mageprofis_orderswithproduct>
+        </helpers>
+    </global>
+    
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <mageprofis_orderswithproduct before="Mage_Adminhtml">MageProfis_OrdersWithProduct_Adminhtml</mageprofis_orderswithproduct>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    
+    <adminhtml>
+        <layout>
+            <updates>
+                <mageprofis_orderswithproduct>
+                    <file>mageprofis_orderswithproduct.xml</file>
+                </mageprofis_orderswithproduct>
+            </updates>
+        </layout>
+    </adminhtml>
+</config>

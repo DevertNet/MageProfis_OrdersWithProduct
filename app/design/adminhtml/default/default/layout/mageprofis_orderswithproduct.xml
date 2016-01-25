@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<layout>
+    <adminhtml_catalog_product_edit>
+        <reference name="product_tabs">
+            <block type="mageprofis_orderswithproduct/adminhtml_catalog_product_edit_tab" name="custom"/>
+            <action method="addTab">
+                <name>Orders with product</name>
+                <block>custom</block>
+            </action>
+        </reference>
+    </adminhtml_catalog_product_edit>
+    
+    <adminhtml_catalog_product_custom>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="mageprofis_orderswithproduct/adminhtml_catalog_product_edit_tab_custom" name="catalog.product.edit.tab.custom"/>
+        </block>
+    </adminhtml_catalog_product_custom>
+
+    <adminhtml_catalog_product_customgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="mageprofis_orderswithproduct/adminhtml_catalog_product_edit_tab_custom" name="catalog.product.edit.tab.custom"/>
+        </block>
+    </adminhtml_catalog_product_customgrid>
+</layout>

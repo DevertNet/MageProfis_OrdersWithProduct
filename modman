@@ -1,0 +1,4 @@
+app/code/local/MageProfis/OrdersWithProduct                                     app/code/local/MageProfis/OrdersWithProduct
+app/etc/modules/MageProfis_OrdersWithProduct.xml                                app/etc/modules/MageProfis_OrdersWithProduct.xml
+app/design/adminhtml/default/default/layout/mageprofis_orderswithproduct.xml    app/design/adminhtml/default/default/layout/mageprofis_orderswithproduct.xml
+app/design/adminhtml/default/default/template/mageprofis/orderswithproduct      app/design/adminhtml/default/default/template/mageprofis/orderswithproduct
