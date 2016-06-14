@@ -25,35 +25,7 @@ class MageProfis_OrdersWithProduct_Block_Adminhtml_Catalog_Product_Edit_Tab_Cust
         return Mage::registry('current_product');
     }
 
-    /**
-     * Add filter
-     *
-     * @param object $column
-     * @return Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Custom
-     */
-    protected function _addColumnFilterToCollection($column)
-    {
-        parent::_addColumnFilterToCollection($column);
-        return $this;
-        
-        // Set custom filter for in product flag
-        if ($column->getId() == 'in_products') {
-            $productIds = $this->_getSelectedProducts();
-            if (empty($productIds)) {
-                $productIds = 0;
-            }
-            if ($column->getFilter()->getValue()) {
-                $this->getCollection()->addFieldToFilter('entity_id', array('in' => $productIds));
-            } else {
-                if($productIds) {
-                    $this->getCollection()->addFieldToFilter('entity_id', array('nin' => $productIds));
-                }
-            }
-        } else {
-            parent::_addColumnFilterToCollection($column);
-        }
-        return $this;
-    }
+
 
     /**
      * Prepare collection
@@ -64,9 +36,24 @@ class MageProfis_OrdersWithProduct_Block_Adminhtml_Catalog_Product_Edit_Tab_Cust
     {
         $product = $this->_getProduct();
         $orderIds = array();
+        $sku = preg_replace('/(_lager|_messe|_aktion)$/', '', $product->getSku());
+        $skus = array($sku);
+        $skus[] = $sku.'_lager';
+        $skus[] = $sku.'_messe';
+        $skus[] = $sku.'_aktion';
         
+        $products = Mage::getModel('catalog/product')->getCollection()
+            ->addAttributeToSelect(array('entity_id', 'sku'))
+            ->addAttributeToFilter( 'sku', array( 'in' => $skus ) );
+        
+        $product_ids = array();
+        foreach($products as $_product)
+        {
+            $product_ids[] = $_product->getId();
+        }
+            
         $order_collection = Mage::getResourceModel('sales/order_item_collection')
-            ->addAttributeToFilter( 'product_id', array('eq' => $product->getId()) )
+            ->addAttributeToFilter( 'product_id', array( 'in' => $product_ids ) )
             ->load();
         
         foreach($order_collection as $orderItem) {
@@ -77,7 +64,49 @@ class MageProfis_OrdersWithProduct_Block_Adminhtml_Catalog_Product_Edit_Tab_Cust
             ->addFieldToFilter('entity_id', array('in' => $orderIds));
 
         $this->setCollection($collection);
-        return parent::_prepareCollection();
+        $this->_preparePage();
+        
+        
+        
+        if ($this->getCollection()) {
+
+            $this->_preparePage();
+
+            $columnId = $this->getParam($this->getVarNameSort(), $this->_defaultSort);
+            $dir      = $this->getParam($this->getVarNameDir(), $this->_defaultDir);
+            $filter   = $this->getParam($this->getVarNameFilter(), null);
+
+            if (is_null($filter)) {
+                $filter = $this->_defaultFilter;
+            }
+
+            if (is_string($filter)) {
+                $data = $this->helper('adminhtml')->prepareFilterString($filter);
+                $this->_setFilterValues($data);
+            }
+            else if ($filter && is_array($filter)) {
+                $this->_setFilterValues($filter);
+            }
+            else if(0 !== sizeof($this->_defaultFilter)) {
+                $this->_setFilterValues($this->_defaultFilter);
+            }
+
+            if (isset($this->_columns[$columnId]) && $this->_columns[$columnId]->getIndex()) {
+                $dir = (strtolower($dir)=='desc') ? 'desc' : 'asc';
+                $this->_columns[$columnId]->setDir($dir);
+                $this->_setCollectionOrder($this->_columns[$columnId]);
+            }
+
+            if (!$this->_isExport) {
+                //$this->getCollection()->load();
+                //$this->_afterLoadCollection();
+            }
+        }
+        
+        
+        
+        //return parent::_prepareCollection();
+        return $this;
     }
 
     /**
@@ -180,6 +209,14 @@ class MageProfis_OrdersWithProduct_Block_Adminhtml_Catalog_Product_Edit_Tab_Cust
         return parent::_prepareColumns();
     }
 
+    public function getRowUrl($row)
+    {
+        if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/view')) {
+            return $this->getUrl('*/sales_order/view', array('order_id' => $row->getId()));
+        }
+        return false;
+    }
+    
     /**
      * Rerieve grid URL
      *
@@ -190,34 +227,6 @@ class MageProfis_OrdersWithProduct_Block_Adminhtml_Catalog_Product_Edit_Tab_Cust
         return $this->getData('grid_url')
             ? $this->getData('grid_url')
             : $this->getUrl('*/*/customGrid', array('_current' => true));
-    }
-
-    /**
-     * Retrieve selected custom products
-     *
-     * @return array
-     */
-    protected function _getSelectedProducts()
-    {
-        $products = $this->getProductsCustom();
-        if (!is_array($products)) {
-            $products = array_keys($this->getSelectedCustomProducts());
-        }
-        return $products;
-    }
-
-    /**
-     * Retrieve custom products
-     *
-     * @return array
-     */
-    public function getSelectedCustomProducts()
-    {
-        $products = array();
-        foreach (Mage::registry('current_product')->getCustomProducts() as $product) {
-            $products[$product->getId()] = array('position' => $product->getPosition());
-        }
-        return $products;
     }
 
 }
